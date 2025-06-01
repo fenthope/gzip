@@ -77,12 +77,12 @@ func (g *gzipHandler) Handle(c *touka.Context) {
 	gz := g.gzPool.Get().(*gzip.Writer)
 	gz.Reset(c.Writer)
 
-	c.SetHeader(headerContentEncoding, "gzip")
+	c.Writer.Header().Set(headerContentEncoding, "gzip")
 	c.Writer.Header().Add(headerVary, headerAcceptEncoding)
 	// check ETag Header
-	oritoukaalEtag := c.GetReqHeader("ETag")
-	if oritoukaalEtag != "" && !strings.HasPrefix(oritoukaalEtag, "W/") {
-		c.SetHeader("ETag", "W/"+oritoukaalEtag)
+	originalEtag := c.GetReqHeader("ETag")
+	if originalEtag != "" && !strings.HasPrefix(originalEtag, "W/") {
+		c.SetHeader("ETag", "W/"+originalEtag)
 	}
 	c.Writer = &gzipWriter{c.Writer, gz}
 	defer func() {
